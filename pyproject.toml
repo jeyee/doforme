@@ -28,17 +28,6 @@ classifiers = [
 ]
 dependencies = []
 
-[project.optional-dependencies]
-openai = ["openai>=1.0.0"]
-anthropic = ["anthropic>=0.18.0"]
-groq = ["groq>=0.4.0"]
-openrouter = ["openai>=1.0.0"]
-all = [
-    "openai>=1.0.0",
-    "anthropic>=0.18.0",
-    "groq>=0.4.0",
-]
-
 [project.urls]
 Homepage = "https://github.com/yourusername/doforme"
 Repository = "https://github.com/yourusername/doforme"

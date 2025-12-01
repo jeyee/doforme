@@ -7,6 +7,8 @@ import re
 import shutil
 import subprocess
 import sys
+import urllib.request
+import urllib.error
 
 from .config import get_api_key, prompt_for_api_key, set_api_key
 
@@ -53,63 +55,85 @@ Assistant: df -h"""
 
     try:
         if provider == "openai":
-            from openai import OpenAI
-            client = OpenAI(api_key=api_key)
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
+            url = "https://api.openai.com/v1/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            }
+            data = {
+                "model": "gpt-4o-mini",
+                "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=0.3,
-                max_tokens=500
-            )
-            command = response.choices[0].message.content.strip()
+                "temperature": 0.3,
+                "max_tokens": 500
+            }
+            req = urllib.request.Request(url, json.dumps(data).encode('utf-8'), headers)
+            with urllib.request.urlopen(req) as response:
+                result = json.loads(response.read().decode('utf-8'))
+                command = result['choices'][0]['message']['content'].strip()
 
         elif provider == "anthropic":
-            from anthropic import Anthropic
-            client = Anthropic(api_key=api_key)
-            response = client.messages.create(
-                model="claude-3-5-haiku-20241022",
-                max_tokens=500,
-                temperature=0.3,
-                system=system_prompt,
-                messages=[
+            url = "https://api.anthropic.com/v1/messages"
+            headers = {
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+                "Content-Type": "application/json"
+            }
+            data = {
+                "model": "claude-3-5-haiku-20241022",
+                "max_tokens": 500,
+                "temperature": 0.3,
+                "system": system_prompt,
+                "messages": [
                     {"role": "user", "content": prompt}
                 ]
-            )
-            command = response.content[0].text.strip()
+            }
+            req = urllib.request.Request(url, json.dumps(data).encode('utf-8'), headers)
+            with urllib.request.urlopen(req) as response:
+                result = json.loads(response.read().decode('utf-8'))
+                command = result['content'][0]['text'].strip()
 
         elif provider == "groq":
-            from groq import Groq
-            client = Groq(api_key=api_key)
-            response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=[
+            url = "https://api.groq.com/openai/v1/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            }
+            data = {
+                "model": "llama-3.3-70b-versatile",
+                "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=0.3,
-                max_tokens=500
-            )
-            command = response.choices[0].message.content.strip()
+                "temperature": 0.3,
+                "max_tokens": 500
+            }
+            req = urllib.request.Request(url, json.dumps(data).encode('utf-8'), headers)
+            with urllib.request.urlopen(req) as response:
+                result = json.loads(response.read().decode('utf-8'))
+                command = result['choices'][0]['message']['content'].strip()
 
         elif provider == "openrouter":
-            from openai import OpenAI
-            client = OpenAI(
-                base_url="https://openrouter.ai/api/v1",
-                api_key=api_key
-            )
-            response = client.chat.completions.create(
-                model="anthropic/claude-3.5-haiku",
-                messages=[
+            url = "https://openrouter.ai/api/v1/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            }
+            data = {
+                "model": "anthropic/claude-3.5-haiku",
+                "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=0.3,
-                max_tokens=500
-            )
-            command = response.choices[0].message.content.strip()
+                "temperature": 0.3,
+                "max_tokens": 500
+            }
+            req = urllib.request.Request(url, json.dumps(data).encode('utf-8'), headers)
+            with urllib.request.urlopen(req) as response:
+                result = json.loads(response.read().decode('utf-8'))
+                command = result['choices'][0]['message']['content'].strip()
 
         else:
             print(f"❌ Unsupported provider: {provider}", file=sys.stderr)
@@ -120,16 +144,22 @@ Assistant: df -h"""
         command = re.sub(r'\n?```$', '', command)
         return command.strip()
 
-    except ImportError as e:
-        print(f"❌ Missing required library for {provider}. Please install it:", file=sys.stderr)
-        if provider == "openai":
-            print(f"   pip install openai", file=sys.stderr)
-        elif provider == "anthropic":
-            print(f"   pip install anthropic", file=sys.stderr)
-        elif provider == "groq":
-            print(f"   pip install groq", file=sys.stderr)
-        elif provider == "openrouter":
-            print(f"   pip install openai", file=sys.stderr)
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode('utf-8') if e.fp else ''
+        print(f"❌ HTTP Error {e.code} querying {provider.title()} API: {e.reason}", file=sys.stderr)
+        if error_body:
+            try:
+                error_data = json.loads(error_body)
+                if 'error' in error_data:
+                    if isinstance(error_data['error'], dict) and 'message' in error_data['error']:
+                        print(f"   {error_data['error']['message']}", file=sys.stderr)
+                    else:
+                        print(f"   {error_data['error']}", file=sys.stderr)
+            except:
+                pass
+        return None
+    except urllib.error.URLError as e:
+        print(f"❌ Network error querying {provider.title()} API: {e.reason}", file=sys.stderr)
         return None
     except Exception as e:
         print(f"❌ Error querying {provider.title()} API: {e}", file=sys.stderr)

@@ -15,23 +15,8 @@ A CLI tool that converts natural language into CLI commands using AI. No more re
 
 ### From PyPI
 
-Install with your preferred LLM provider:
-
 ```bash
-# For OpenAI support
-pip install "doforme[openai]"
-
-# For Anthropic/Claude support
-pip install "doforme[anthropic]"
-
-# For Groq support
-pip install "doforme[groq]"
-
-# For OpenRouter support
-pip install "doforme[openrouter]"
-
-# For all providers
-pip install "doforme[all]"
+pip install doforme
 ```
 
 ### From source
@@ -39,14 +24,10 @@ pip install "doforme[all]"
 ```bash
 git clone https://github.com/yourusername/doforme.git
 cd doforme
-
-# Install with your preferred provider
-pip install -e ".[openai]"     # For OpenAI
-pip install -e ".[anthropic]"  # For Anthropic/Claude
-pip install -e ".[groq]"       # For Groq
-pip install -e ".[openrouter]" # For OpenRouter
-pip install -e ".[all]"        # For all providers
+pip install -e .
 ```
+
+**No external dependencies required!** DoForMe uses Python's built-in libraries to communicate with all LLM provider APIs.
 
 ## Setup
 
@@ -214,7 +195,7 @@ Valid provider values: `openai`, `anthropic`, `groq`, `openrouter`
 - Python 3.8 or higher
 - API key from one of the supported providers (OpenAI, Anthropic, Groq, or OpenRouter)
 - Internet connection (for API calls)
-- Provider-specific Python package (installed automatically with extras)
+- No external dependencies required!
 
 ## Privacy & Security
 
