@@ -13,6 +13,28 @@ import urllib.error
 from .config import get_api_key, prompt_for_api_key, set_api_key
 
 
+def is_builtin_command(command):
+    """Check if the command is a shell built-in."""
+    # Extract the first command (tool name)
+    parts = command.strip().split()
+    if not parts:
+        return False
+
+    tool = parts[0]
+
+    # List of common shell built-ins
+    builtins = ["cd", "echo", "export", "set", "source", "alias", "pwd", "pushd", "popd",
+                "dirs", "bg", "fg", "jobs", "kill", "wait", "suspend", "eval", "exec",
+                "test", "[", "ulimit", "umask", "readonly", "shift", "unset", ".", ":",
+                "true", "false", "break", "continue", "return", "exit", "logout", "hash",
+                "type", "command", "builtin", "enable", "help", "let", "local", "declare",
+                "typeset", "bind", "caller", "complete", "compgen", "compopt", "fc",
+                "getopts", "history", "mapfile", "printf", "read", "readarray", "shopt",
+                "times", "trap", "unalias"]
+
+    return tool in builtins
+
+
 def check_tool_exists(command):
     """Check if the main tool/command exists on the system."""
     # Extract the first command (tool name)
@@ -22,8 +44,8 @@ def check_tool_exists(command):
 
     tool = parts[0]
 
-    # Handle shell built-ins and common commands
-    if tool in ["cd", "echo", "export", "set", "source", "alias"]:
+    # Handle shell built-ins - they exist in the shell
+    if is_builtin_command(command):
         return True
 
     # Check if tool exists in PATH
@@ -246,6 +268,13 @@ def main():
         return 1
 
     print(f"\n📋 Command: {command}")
+
+    # Check if it's a shell built-in command
+    if is_builtin_command(command):
+        print(f"\n⚠️  This is a shell built-in command that cannot be executed by this app.")
+        print(f"   Please run it manually in your command line:")
+        print(f"\n   {command}\n")
+        return 0
 
     # Check if required tool exists
     if not check_tool_exists(command):
