@@ -13,7 +13,7 @@ A CLI tool that converts natural language into CLI commands using AI. No more re
 
 ## Installation
 
-### From PyPI (when published)
+### From PyPI
 
 ```bash
 pip install doforme
