@@ -13,8 +13,37 @@ import urllib.error
 from .config import get_api_key, prompt_for_api_key, set_api_key
 
 
+def is_shell_builtin(command):
+    """Check if the command is any shell built-in (exists in shell)."""
+    parts = command.strip().split()
+    if not parts:
+        return False
+
+    tool = parts[0]
+
+    # All common shell built-ins
+    all_builtins = [
+        "cd", "echo", "export", "set", "source", "alias", "pwd", "pushd", "popd",
+        "dirs", "bg", "fg", "jobs", "kill", "wait", "suspend", "eval", "exec",
+        "test", "[", "ulimit", "umask", "readonly", "shift", "unset", ".", ":",
+        "true", "false", "break", "continue", "return", "exit", "logout", "hash",
+        "type", "command", "builtin", "enable", "help", "let", "local", "declare",
+        "typeset", "bind", "caller", "complete", "compgen", "compopt", "fc",
+        "getopts", "history", "mapfile", "printf", "read", "readarray", "shopt",
+        "times", "trap", "unalias"
+    ]
+
+    return tool in all_builtins
+
+
 def is_builtin_command(command):
-    """Check if the command is a shell built-in."""
+    """Check if the command is a shell built-in that modifies shell state.
+
+    Only returns True for built-ins that cannot work properly via subprocess
+    because they modify the shell's internal state (e.g., cd, export, alias).
+    Built-ins that just output text or check conditions (e.g., echo, pwd, test)
+    can be executed normally via subprocess.
+    """
     # Extract the first command (tool name)
     parts = command.strip().split()
     if not parts:
@@ -22,17 +51,15 @@ def is_builtin_command(command):
 
     tool = parts[0]
 
-    # List of common shell built-ins
-    builtins = ["cd", "echo", "export", "set", "source", "alias", "pwd", "pushd", "popd",
-                "dirs", "bg", "fg", "jobs", "kill", "wait", "suspend", "eval", "exec",
-                "test", "[", "ulimit", "umask", "readonly", "shift", "unset", ".", ":",
-                "true", "false", "break", "continue", "return", "exit", "logout", "hash",
-                "type", "command", "builtin", "enable", "help", "let", "local", "declare",
-                "typeset", "bind", "caller", "complete", "compgen", "compopt", "fc",
-                "getopts", "history", "mapfile", "printf", "read", "readarray", "shopt",
-                "times", "trap", "unalias"]
+    # List of shell built-ins that modify shell state and won't work via subprocess
+    state_modifying_builtins = [
+        "cd", "export", "set", "source", "alias", "pushd", "popd", "dirs",
+        "ulimit", "umask", "readonly", "unset", "eval", "exec", ".",
+        "hash", "declare", "typeset", "local", "bind", "complete", "compgen",
+        "compopt", "shopt", "trap", "unalias"
+    ]
 
-    return tool in builtins
+    return tool in state_modifying_builtins
 
 
 def check_tool_exists(command):
@@ -45,7 +72,7 @@ def check_tool_exists(command):
     tool = parts[0]
 
     # Handle shell built-ins - they exist in the shell
-    if is_builtin_command(command):
+    if is_shell_builtin(command):
         return True
 
     # Check if tool exists in PATH
@@ -269,9 +296,9 @@ def main():
 
     print(f"\n📋 Command: {command}")
 
-    # Check if it's a shell built-in command
+    # Check if it's a state-modifying shell built-in command
     if is_builtin_command(command):
-        print(f"\n⚠️  This is a shell built-in command that cannot be executed by this app.")
+        print(f"\n⚠️  This command modifies shell state and cannot be executed by this app.")
         print(f"   Please run it manually in your command line:")
         print(f"\n   {command}\n")
         return 0
