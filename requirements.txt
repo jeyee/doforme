@@ -1,1 +1,12 @@
+# Base installation (no provider dependencies)
+# Install with specific provider support:
+#   pip install -e ".[openai]"      # For OpenAI support
+#   pip install -e ".[anthropic]"   # For Anthropic/Claude support
+#   pip install -e ".[groq]"        # For Groq support
+#   pip install -e ".[openrouter]"  # For OpenRouter support
+#   pip install -e ".[all]"         # For all providers
+
+# Optional provider dependencies
 openai>=1.0.0
+anthropic>=0.18.0
+groq>=0.4.0

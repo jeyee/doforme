@@ -12,7 +12,7 @@ license = {text = "MIT"}
 authors = [
     {name = "DoForMe Contributors"}
 ]
-keywords = ["cli", "ai", "llm", "openai", "natural-language", "command-line"]
+keywords = ["cli", "ai", "llm", "openai", "anthropic", "claude", "groq", "openrouter", "natural-language", "command-line"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -26,8 +26,17 @@ classifiers = [
     "Topic :: Utilities",
     "Topic :: System :: Shells",
 ]
-dependencies = [
+dependencies = []
+
+[project.optional-dependencies]
+openai = ["openai>=1.0.0"]
+anthropic = ["anthropic>=0.18.0"]
+groq = ["groq>=0.4.0"]
+openrouter = ["openai>=1.0.0"]
+all = [
     "openai>=1.0.0",
+    "anthropic>=0.18.0",
+    "groq>=0.4.0",
 ]
 
 [project.urls]

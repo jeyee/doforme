@@ -8,8 +8,6 @@ import shutil
 import subprocess
 import sys
 
-from openai import OpenAI
-
 from .config import get_api_key, prompt_for_api_key, set_api_key
 
 
@@ -30,10 +28,8 @@ def check_tool_exists(command):
     return shutil.which(tool) is not None
 
 
-def get_command_from_llm(prompt, api_key):
-    """Query OpenAI to convert natural language to CLI command."""
-    client = OpenAI(api_key=api_key)
-
+def get_command_from_llm(prompt, api_key, provider):
+    """Query LLM to convert natural language to CLI command."""
     system_prompt = """You are a helpful assistant that converts natural language instructions into CLI commands.
 
 Rules:
@@ -56,29 +52,94 @@ User: "show disk usage"
 Assistant: df -h"""
 
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.3,
-            max_tokens=500
-        )
+        if provider == "openai":
+            from openai import OpenAI
+            client = OpenAI(api_key=api_key)
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.3,
+                max_tokens=500
+            )
+            command = response.choices[0].message.content.strip()
 
-        command = response.choices[0].message.content.strip()
+        elif provider == "anthropic":
+            from anthropic import Anthropic
+            client = Anthropic(api_key=api_key)
+            response = client.messages.create(
+                model="claude-3-5-haiku-20241022",
+                max_tokens=500,
+                temperature=0.3,
+                system=system_prompt,
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            command = response.content[0].text.strip()
+
+        elif provider == "groq":
+            from groq import Groq
+            client = Groq(api_key=api_key)
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.3,
+                max_tokens=500
+            )
+            command = response.choices[0].message.content.strip()
+
+        elif provider == "openrouter":
+            from openai import OpenAI
+            client = OpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=api_key
+            )
+            response = client.chat.completions.create(
+                model="anthropic/claude-3.5-haiku",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.3,
+                max_tokens=500
+            )
+            command = response.choices[0].message.content.strip()
+
+        else:
+            print(f"❌ Unsupported provider: {provider}", file=sys.stderr)
+            return None
+
         # Remove any markdown code blocks if present
         command = re.sub(r'^```(?:bash|sh)?\n?', '', command)
         command = re.sub(r'\n?```$', '', command)
         return command.strip()
 
+    except ImportError as e:
+        print(f"❌ Missing required library for {provider}. Please install it:", file=sys.stderr)
+        if provider == "openai":
+            print(f"   pip install openai", file=sys.stderr)
+        elif provider == "anthropic":
+            print(f"   pip install anthropic", file=sys.stderr)
+        elif provider == "groq":
+            print(f"   pip install groq", file=sys.stderr)
+        elif provider == "openrouter":
+            print(f"   pip install openai", file=sys.stderr)
+        return None
     except Exception as e:
-        print(f"❌ Error querying OpenAI API: {e}", file=sys.stderr)
+        print(f"❌ Error querying {provider.title()} API: {e}", file=sys.stderr)
         return None
 
 
 def handle_set_api_key(prompt):
     """Check if the prompt is asking to set the API key."""
+    from .config import prompt_for_provider, PROVIDERS
+
     # Pattern to match variations of setting API key
     patterns = [
         r"set (?:the )?api[ _]?key to (.+)",
@@ -91,8 +152,16 @@ def handle_set_api_key(prompt):
         match = re.search(pattern, prompt.lower())
         if match:
             api_key = match.group(1).strip()
-            set_api_key(api_key)
-            print(f"✓ API key updated successfully")
+
+            # Prompt for provider
+            provider = prompt_for_provider()
+            if not provider:
+                print("❌ No provider selected")
+                return True
+
+            set_api_key(api_key, provider)
+            provider_name = PROVIDERS[provider]["name"]
+            print(f"✓ {provider_name} API key updated successfully")
             return True
 
     return False
@@ -132,17 +201,17 @@ def main():
     if handle_set_api_key(prompt):
         return 0
 
-    # Get API key
-    api_key = get_api_key()
+    # Get API key and provider
+    api_key, provider = get_api_key()
     if not api_key:
-        api_key = prompt_for_api_key()
+        api_key, provider = prompt_for_api_key()
         if not api_key:
             return 1
 
     print(f"🤔 Thinking about: {prompt}")
 
     # Get command from LLM
-    command = get_command_from_llm(prompt, api_key)
+    command = get_command_from_llm(prompt, api_key, provider)
     if not command:
         return 1
 
