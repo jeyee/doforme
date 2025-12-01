@@ -29,9 +29,9 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/yourusername/doforme"
-Repository = "https://github.com/yourusername/doforme"
-Issues = "https://github.com/yourusername/doforme/issues"
+Homepage = "https://github.com/jeyee/doforme"
+Repository = "https://github.com/jeyee/doforme"
+Issues = "https://github.com/jeyee/doforme/issues"
 
 [project.scripts]
 doforme = "doforme.cli:main"
