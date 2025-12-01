@@ -1,1 +1,2 @@
-openai>=1.0.0
+# No external dependencies required
+# DoForMe uses Python's built-in urllib for HTTP requests

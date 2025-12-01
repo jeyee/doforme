@@ -4,7 +4,7 @@ A CLI tool that converts natural language into CLI commands using AI. No more re
 
 ## Features
 
-- 🤖 Uses OpenAI's GPT models to understand natural language
+- 🤖 Supports multiple LLM providers (OpenAI, Anthropic/Claude, Groq, OpenRouter)
 - 🔍 Automatically checks if required tools are installed
 - ⚡ Fast and easy to use
 - 🔐 Secure API key management
@@ -27,27 +27,46 @@ cd doforme
 pip install -e .
 ```
 
+**No external dependencies required!** DoForMe uses Python's built-in libraries to communicate with all LLM provider APIs.
+
 ## Setup
 
-### 1. Get an OpenAI API Key
+### 1. Get an API Key
 
-Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
+Choose your preferred LLM provider and get an API key:
+
+- **OpenAI**: [OpenAI Platform](https://platform.openai.com/api-keys)
+- **Anthropic (Claude)**: [Anthropic Console](https://console.anthropic.com/settings/keys)
+- **Groq**: [Groq Console](https://console.groq.com/keys)
+- **OpenRouter**: [OpenRouter](https://openrouter.ai/keys)
 
 ### 2. Configure the API Key
 
-You have two options:
+You have three options:
 
 **Option A: Environment Variable (Recommended)**
 
 ```bash
+# For OpenAI
 export OPENAI_API_KEY=your_key_here
+
+# For Anthropic/Claude
+export ANTHROPIC_API_KEY=your_key_here
+
+# For Groq
+export GROQ_API_KEY=your_key_here
+
+# For OpenRouter
+export OPENROUTER_API_KEY=your_key_here
 ```
 
 Add this to your `~/.bashrc` or `~/.zshrc` to make it permanent.
 
 **Option B: Interactive Setup**
 
-Just run `doforme` without an API key and it will prompt you to enter one:
+Just run `doforme` without an API key and it will prompt you to:
+1. Select your LLM provider
+2. Enter your API key
 
 ```bash
 doforme "list files"
@@ -57,6 +76,7 @@ doforme "list files"
 
 ```bash
 doforme "set the api key to sk-..."
+# This will prompt you to select a provider
 ```
 
 ## Usage
@@ -120,7 +140,7 @@ doforme -y "list files"
 ## How It Works
 
 1. **Input**: You provide a natural language description
-2. **AI Processing**: DoForMe sends your request to OpenAI's API
+2. **AI Processing**: DoForMe sends your request to your chosen LLM provider's API
 3. **Command Generation**: The AI generates the appropriate CLI command
 4. **Validation**: Checks if required tools are installed
 5. **Confirmation**: Shows you the command and asks for confirmation
@@ -150,28 +170,39 @@ $ doforme "convert video with ffmpeg"
 
 ## Configuration
 
-API key is stored in `~/.config/doforme/config` with secure permissions (600).
+API key and provider selection are stored in `~/.config/doforme/config.json` with secure permissions (600).
 
 To change your API key:
 
 ```bash
 doforme "set the api key to sk-new-key-here"
+# This will prompt you to select a provider
 ```
 
-Or manually edit `~/.config/doforme/config`.
+Or manually edit `~/.config/doforme/config.json`:
+
+```json
+{
+  "api_key": "your-api-key-here",
+  "provider": "openai"
+}
+```
+
+Valid provider values: `openai`, `anthropic`, `groq`, `openrouter`
 
 ## Requirements
 
 - Python 3.8 or higher
-- OpenAI API key
+- API key from one of the supported providers (OpenAI, Anthropic, Groq, or OpenRouter)
 - Internet connection (for API calls)
+- No external dependencies required!
 
 ## Privacy & Security
 
-- Your prompts are sent to OpenAI's API
-- API keys are stored locally with restricted permissions
+- Your prompts are sent to your chosen LLM provider's API
+- API keys are stored locally with restricted permissions (600)
 - Commands are shown before execution
-- No telemetry or tracking
+- No telemetry or tracking by DoForMe
 
 ## Contributing
 
@@ -183,9 +214,11 @@ MIT License - see LICENSE file for details
 
 ## Troubleshooting
 
-### "No OpenAI API key found"
+### "No API key found"
 
-Make sure you've set the `OPENAI_API_KEY` environment variable or run the interactive setup.
+Make sure you've either:
+- Set the appropriate environment variable for your provider (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GROQ_API_KEY`, or `OPENROUTER_API_KEY`)
+- Run the interactive setup when prompted
 
 ### "Required tool not installed"
 
@@ -208,7 +241,7 @@ Use `--dry-run` to see the generated command and adjust your prompt for better r
 
 ## Acknowledgments
 
-- Built with [OpenAI API](https://openai.com/)
+- Supports multiple LLM providers: [OpenAI](https://openai.com/), [Anthropic](https://anthropic.com/), [Groq](https://groq.com/), and [OpenRouter](https://openrouter.ai/)
 - Inspired by the need to simplify CLI usage
 
 ## Support

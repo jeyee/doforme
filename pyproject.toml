@@ -12,7 +12,7 @@ license = {text = "MIT"}
 authors = [
     {name = "DoForMe Contributors"}
 ]
-keywords = ["cli", "ai", "llm", "openai", "natural-language", "command-line"]
+keywords = ["cli", "ai", "llm", "openai", "anthropic", "claude", "groq", "openrouter", "natural-language", "command-line"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -26,9 +26,7 @@ classifiers = [
     "Topic :: Utilities",
     "Topic :: System :: Shells",
 ]
-dependencies = [
-    "openai>=1.0.0",
-]
+dependencies = []
 
 [project.urls]
 Homepage = "https://github.com/yourusername/doforme"
