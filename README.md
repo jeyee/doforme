@@ -29,56 +29,6 @@ pip install -e .
 
 **No external dependencies required!** DoForMe uses Python's built-in libraries to communicate with all LLM provider APIs.
 
-## Setup
-
-### 1. Get an API Key
-
-Choose your preferred LLM provider and get an API key:
-
-- **OpenAI**: [OpenAI Platform](https://platform.openai.com/api-keys)
-- **Anthropic (Claude)**: [Anthropic Console](https://console.anthropic.com/settings/keys)
-- **Groq**: [Groq Console](https://console.groq.com/keys)
-- **OpenRouter**: [OpenRouter](https://openrouter.ai/keys)
-
-### 2. Configure the API Key
-
-You have three options:
-
-**Option A: Environment Variable (Recommended)**
-
-```bash
-# For OpenAI
-export OPENAI_API_KEY=your_key_here
-
-# For Anthropic/Claude
-export ANTHROPIC_API_KEY=your_key_here
-
-# For Groq
-export GROQ_API_KEY=your_key_here
-
-# For OpenRouter
-export OPENROUTER_API_KEY=your_key_here
-```
-
-Add this to your `~/.bashrc` or `~/.zshrc` to make it permanent.
-
-**Option B: Interactive Setup**
-
-Just run `doforme` without an API key and it will prompt you to:
-1. Select your LLM provider
-2. Enter your API key
-
-```bash
-doforme "list files"
-```
-
-**Option C: Using DoForMe itself**
-
-```bash
-doforme "set the api key to sk-..."
-# This will prompt you to select a provider
-```
-
 ## Usage
 
 ### Basic Usage
@@ -135,6 +85,56 @@ Skip confirmation (use with caution!):
 ```bash
 doforme --yes "show current date"
 doforme -y "list files"
+```
+
+## Setup
+
+### 1. Get an API Key
+
+Choose your preferred LLM provider and get an API key:
+
+- **OpenAI**: [OpenAI Platform](https://platform.openai.com/api-keys)
+- **Anthropic (Claude)**: [Anthropic Console](https://console.anthropic.com/settings/keys)
+- **Groq**: [Groq Console](https://console.groq.com/keys)
+- **OpenRouter**: [OpenRouter](https://openrouter.ai/keys)
+
+### 2. Configure the API Key
+
+You have three options:
+
+**Option A: Environment Variable (Recommended)**
+
+```bash
+# For OpenAI
+export OPENAI_API_KEY=your_key_here
+
+# For Anthropic/Claude
+export ANTHROPIC_API_KEY=your_key_here
+
+# For Groq
+export GROQ_API_KEY=your_key_here
+
+# For OpenRouter
+export OPENROUTER_API_KEY=your_key_here
+```
+
+Add this to your `~/.bashrc` or `~/.zshrc` to make it permanent.
+
+**Option B: Interactive Setup**
+
+Just run `doforme` without an API key and it will prompt you to:
+1. Select your LLM provider
+2. Enter your API key
+
+```bash
+doforme "list files"
+```
+
+**Option C: Using DoForMe itself**
+
+```bash
+doforme "set the api key to sk-..."
+# This will prompt you to select a provider
 ```
 
 ## How It Works
